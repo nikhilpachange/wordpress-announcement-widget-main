@@ -1,5 +1,4 @@
 <?php
-
 /*
 * Plugin Name: WP Announcement
 * Description: This is a wordpress plugin which we can use to give some information to site users
