@@ -1,102 +1,67 @@
 <?php
 
-if(!defined("ABSPATH")) die("Access denied");
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-// Method #2
-include_once ABSPATH . "wp-load.php";
+include_once ABSPATH . 'wp-load.php';
 
-class App_Announcement extends WP_Widget{
+class App_Announcement extends WP_Widget {
 
-    public function __construct(){
-        
-        parent::__construct("wpa_announcement", "WPA Announcement", [
-            "description" => "This is a custom widget for wordpress announcements"
-        ]);
+    public function __construct() {
+        parent::__construct(
+            'wpa_announcement',
+            'WPA Announcement',
+            [ 'description' => 'Custom widget for WordPress announcements.' ]
+        );
     }
 
-    // Create widget Admin view
+    // Admin form
     public function form( $instance ) {
-
-        $old_title = isset($instance['wpa_title']) ? $instance['wpa_title'] : "";
-        $old_description = isset($instance['wpa_description']) ? $instance['wpa_description'] : "";
+        $title = esc_attr( $instance['wpa_title'] ?? '' );
+        $desc  = esc_textarea( $instance['wpa_description'] ?? '' );
         ?>
         <p>
-            <label for="<?php echo $this->get_field_id('wpa_title') ?>">Title</label>
-            <input class="widefat" type="text" 
-            name="<?php echo $this->get_field_name('wpa_title') ?>" value="<?php echo $old_title; ?>" id="<?php echo $this->get_field_id('wpa_title') ?>">
+            <label for="<?= $this->get_field_id('wpa_title'); ?>">Title</label>
+            <input class="widefat" id="<?= $this->get_field_id('wpa_title'); ?>"
+                name="<?= $this->get_field_name('wpa_title'); ?>" type="text" value="<?= $title; ?>">
         </p>
         <p>
-            <label for="<?php echo $this->get_field_id('wpa_description') ?>">Description</label>
-            <textarea class="widefat" name="<?php echo $this->get_field_name('wpa_description') ?>" id="<?php echo $this->get_field_id('wpa_description') ?>" cols="30" rows="10"><?php echo $old_description; ?></textarea>
+            <label for="<?= $this->get_field_id('wpa_description'); ?>">Description</label>
+            <textarea class="widefat" id="<?= $this->get_field_id('wpa_description'); ?>"
+                name="<?= $this->get_field_name('wpa_description'); ?>" rows="6"><?= $desc; ?></textarea>
         </p>
         <?php
     }
 
-    // To save form data
-    public function update( $new_instance, $old_instance ) {
-
-        $instance = [];
-
-        $instance['wpa_title'] = isset($new_instance['wpa_title']) ? sanitize_text_field($new_instance['wpa_title']) : "";
-
-        $instance['wpa_description'] = isset($new_instance['wpa_description']) ? sanitize_textarea_field($new_instance['wpa_description']) : "";
-
-        return $instance;
+    // Save widget data
+    public function update( $new, $old ) {
+        return [
+            'wpa_title'       => sanitize_text_field( $new['wpa_title'] ?? '' ),
+            'wpa_description' => sanitize_textarea_field( $new['wpa_description'] ?? '' ),
+        ];
     }
 
-    // Render Widget to Frontend
+    // Frontend output
     public function widget( $args, $instance ) {
+        $title = esc_html( $instance['wpa_title'] ?? '' );
+        $desc  = wpautop( esc_html( $instance['wpa_description'] ?? '' ) );
 
-        ?>
+        echo $args['before_widget']; ?>
         <style>
-            /* CSS for the Announcement Widget */
-
-            /* Widget Container */
             .widget_wpa_announcement {
-                background-color: #f9f9f9;
-                padding: 20px;
-                border: 1px solid #ddd;
-                margin-bottom: 25px;
-                border-radius: 5px;
-                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-                text-align: center;
+                background: #f9f9f9; padding: 20px; border: 1px solid #ddd;
+                border-radius: 5px; box-shadow: 0 0 10px rgba(0,0,0,.1);
+                text-align: center; margin-bottom: 25px;
             }
-
-            /* Widget Title */
-            .widget_wpa_announcement h2 {
-                margin-top: 0;
-                font-size: 24px;
-                color: #333;
-            }
-
-            /* Banner Image */
-            .widget_wpa_announcement img {
-                max-width: 47%;
-                height: auto;
-                margin-bottom: 15px;
-            }
-
-            /* Description */
-            .widget_wpa_announcement .widget-description {
-                font-size: 16px;
-                line-height: 1.5;
-                color: #666;
-            }
+            .widget_wpa_announcement h2 { font-size: 22px; margin: 0 0 10px; color: #333; }
+            .widget_wpa_announcement img { width: 120px; margin: 10px 0; }
+            .widget_wpa_announcement .widget-description { font-size: 15px; color: #666; }
         </style>
+        <div class="widget_wpa_announcement">
+            <?= $args['before_title'] . $title . $args['after_title']; ?>
+            <img src="<?= esc_url( WPA_PLUGIN_URL . 'images/sound.png' ); ?>" alt="Announcement">
+            <div class="widget-description"><?= $desc; ?></div>
+        </div>
         <?php
-        
-        echo $args['before_widget'];
-        
-            echo $args['before_title'];
-
-                echo $instance['wpa_title'];
-
-            echo $args['after_title'];
-
-            echo '<img src="'.WPA_PLUGIN_URL.'images/sound.png" style="width: 130px;"/>';
-
-            echo '<div class="widget-description">'.wpautop($instance['wpa_description']).'</div>';
-
         echo $args['after_widget'];
     }
 }
